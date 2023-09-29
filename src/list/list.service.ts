@@ -135,11 +135,54 @@ export class ListService {
     return this.listModel
       .find({})
       .populate('customer')
-      .populate({
+      .populate([
+        {
+          path: 'Tasks.assigned',
+          model: 'Customer',
+        },
+        {
+          path: 'Tasks.assignee',
+          model: 'Customer',
+        },
+      ])
+      .exec();
+  }
+
+
+  async updateTaskUsers(listId: string, taskId: string, updatedTask: Task): Promise<TaskList> {
+    const list = await this.listModel.findById(listId).exec();
+    if (!list) {
+      throw new NotFoundException('List not found');
+    }
+
+    const taskToUpdate = list.Tasks.find(
+        (task) => task._id.toString() === taskId,
+    );
+    if (!taskToUpdate) {
+      throw new NotFoundException('Task not found');
+    }
+    console.log(updatedTask.assigned, "UPDATED TASK ASSIGNED")
+    taskToUpdate.assigned = updatedTask.assigned
+
+    list.markModified('Tasks');
+
+    const updatedList = await list.save();
+
+    if (!updatedList) {
+      throw new Error('Failed to save updated list');
+    }
+    console.log('List updated successfully:', updatedList);
+
+    return updatedList.populate([
+      {
+        path: 'Tasks.assigned',
+        model: 'Customer', // Make sure this matches the model name
+      },
+      {
         path: 'Tasks.assignee',
         model: 'Customer', // Make sure this matches the model name
-      })
-      .exec();
+      },
+    ])
   }
 
   async deleteAllLists() {

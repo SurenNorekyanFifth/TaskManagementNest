@@ -66,4 +66,13 @@ export class ListController {
   ): Promise<TaskList> {
     return this.listService.updateTaskDescription(listId, taskId, updatedTask);
   }
+
+  @Put(':listId/tasks/:taskId/update-assigned')
+  async updateTaskAssigned(
+      @Param('listId') listId: string,
+      @Param('taskId') taskId: string,
+      @Body() updatedTask: Task,
+  ){
+    return this.listService.updateTaskUsers(listId,taskId,updatedTask)
+  }
 }
