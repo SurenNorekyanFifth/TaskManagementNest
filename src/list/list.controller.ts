@@ -31,7 +31,6 @@ export class ListController {
 
   @Get('byCustomer/:customerId')
   async getListByUserId(@Param('customerId') customerId: string) {
-    console.log(customerId);
     return this.listService.getListByUserId(customerId);
   }
 
@@ -69,10 +68,19 @@ export class ListController {
 
   @Put(':listId/tasks/:taskId/update-assigned')
   async updateTaskAssigned(
-      @Param('listId') listId: string,
-      @Param('taskId') taskId: string,
-      @Body() updatedTask: Task,
-  ){
-    return this.listService.updateTaskUsers(listId,taskId,updatedTask)
+    @Param('listId') listId: string,
+    @Param('taskId') taskId: string,
+    @Body() updatedTask: Task,
+  ) {
+    return this.listService.updateTaskUsers(listId, taskId, updatedTask);
+  }
+
+  @Put(':listId/tasks/:taskId/update-dueDate')
+  async updateDueDate(
+    @Param('listId') listId: string,
+    @Param('taskId') taskId: string,
+    @Body() dueTo: Date,
+  ) {
+    return this.listService.updateTaskDueDate(listId, taskId, dueTo);
   }
 }

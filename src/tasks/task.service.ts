@@ -38,7 +38,6 @@ export class TaskService {
     const assignee = await this.customerService.findOneById(assigneeId);
     const assignedUsers = await this.customerService.findManyByIds(assignedId);
     if (!assignee) {
-      console.log(assigneeId);
       throw new NotFoundException(`Customer with id ${assigneeId} not found.`);
     }
 

@@ -65,7 +65,6 @@ export class ListService {
     try {
       // Create the task using the TaskService
       const createdTask = await this.taskService.createTask(createTaskDto);
-      console.log(createdTask.assignee);
 
       // Find the list by ID and push the created task to the Tasks array
       const updatedList = await this.listModel
@@ -79,8 +78,6 @@ export class ListService {
       if (!updatedList) {
         return null;
       }
-
-      console.log(updatedList);
 
       return updatedList;
     } catch (error) {
@@ -120,9 +117,6 @@ export class ListService {
         throw new Error('Failed to save updated list');
       }
 
-      // Add some logging here to indicate success
-      console.log('List updated successfully:', updatedList);
-
       return updatedList;
     } catch (error) {
       // Add error logging
@@ -148,21 +142,24 @@ export class ListService {
       .exec();
   }
 
-
-  async updateTaskUsers(listId: string, taskId: string, updatedTask: Task): Promise<TaskList> {
+  async updateTaskUsers(
+    listId: string,
+    taskId: string,
+    updatedTask: Task,
+  ): Promise<TaskList> {
     const list = await this.listModel.findById(listId).exec();
     if (!list) {
       throw new NotFoundException('List not found');
     }
 
     const taskToUpdate = list.Tasks.find(
-        (task) => task._id.toString() === taskId,
+      (task) => task._id.toString() === taskId,
     );
     if (!taskToUpdate) {
       throw new NotFoundException('Task not found');
     }
-    console.log(updatedTask.assigned, "UPDATED TASK ASSIGNED")
-    taskToUpdate.assigned = updatedTask.assigned
+
+    taskToUpdate.assigned = updatedTask.assigned;
 
     list.markModified('Tasks');
 
@@ -171,7 +168,6 @@ export class ListService {
     if (!updatedList) {
       throw new Error('Failed to save updated list');
     }
-    console.log('List updated successfully:', updatedList);
 
     return updatedList.populate([
       {
@@ -182,7 +178,47 @@ export class ListService {
         path: 'Tasks.assignee',
         model: 'Customer', // Make sure this matches the model name
       },
-    ])
+    ]);
+  }
+
+  async updateTaskDueDate(
+    listId: string,
+    taskId: string,
+    dueTo: Date,
+  ): Promise<TaskList | null> {
+    try {
+      const list = await this.listModel.findById(listId).exec();
+
+      if (!list) {
+        throw new Error('List not found');
+      }
+
+      const taskToUpdate = list.Tasks.find(
+        (task) => task._id.toString() === taskId,
+      );
+
+      if (!taskToUpdate) {
+        throw new Error('Task not found in the list');
+      }
+
+      // Update the dueTo date of the task
+      taskToUpdate.dueTo = dueTo;
+
+      // Mark the 'Tasks' field as modified to ensure it gets saved
+      list.markModified('Tasks');
+
+      const updatedList = await list.save();
+
+      if (!updatedList) {
+        throw new Error('Failed to save updated list');
+      }
+
+      return updatedList;
+    } catch (error) {
+      // Add error logging
+      console.error('Error updating list:', error);
+      throw error;
+    }
   }
 
   async deleteAllLists() {

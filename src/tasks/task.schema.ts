@@ -24,6 +24,9 @@ export class Task extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'Customer', required: false })
   assigned: Customer[];
+
+  @Prop({ type: Date, required: false })
+  dueTo: Date;
 }
 
 export const TaskSchema = SchemaFactory.createForClass(Task);
